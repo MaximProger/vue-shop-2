@@ -1,30 +1,54 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+  <div class="container">
+    <button type="button" class="btn btn-primary mb-3">Add product</button>
+    <div v-if="isLoading" class="text-center">
+      <div class="spinner-grow text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    <product-list
+      v-else-if="products.length"
+      :products="products"
+      @remove="removeProduct"
+    ></product-list>
+    <h1 v-else>Products list is empty</h1>
+  </div>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+import ProductList from "@/components/product/ProductList.vue";
+import axios from "axios";
+export default {
+  components: {
+    ProductList,
+  },
+  data: () => {
+    return {
+      products: [],
+      isLoading: true,
+    };
+  },
+  methods: {
+    async fetchProducts() {
+      try {
+        const res = await axios.get(
+          "https://fakestoreapi.com/products?limit=6"
+        );
+        this.products = res.data;
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    removeProduct(id) {
+      this.products = this.products.filter((product) => product.id !== id);
+    },
+  },
+  mounted() {
+    this.fetchProducts();
+  },
+};
+</script>
 
-nav {
-  padding: 30px;
-}
-
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>
+<style></style>
